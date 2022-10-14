@@ -8,3 +8,10 @@ inn 'ИНН' = DATA BPSTRING[9](LegalEntity) IN base;
 
 //при группировке организаций по ИНН (свойству inn) в каждой из групп должна быть не повторяющаяся организация.
 legalEntityINN = GROUP AGGR LegalEntity legalEntity BY inn(legalEntity); 
+
+//добавление и удаление товаров, изменение атрибутов
+
+FORM legalEntities 'Организации'
+    OBJECTS l = LegalEntity
+    PROPERTIES(l) name, inn, address, NEW, DELETE
+;
