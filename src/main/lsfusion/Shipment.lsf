@@ -1,0 +1,57 @@
+//сущности и атрибуты, необходимые для РАСХОДНОЙ накладной оптовой продажи товара.
+MODULE Shipment;
+
+//подтягиваем функциональность из других областей
+REQUIRE Stock, Item, LegalEntity;
+//шапка расходной накладной
+CLASS Shipment 'Расходная накладная';
+CLASS ShipmentDetail 'Строка расходной накладной';
+//сущность расходной накладной
+shipment 'Документ строки' = DATA Shipment (ShipmentDetail) NONULL DELETE;
+index 'Номер строки' (ShipmentDetail d) =
+        PARTITION SUM 1 IF d IS ShipmentDetail
+        ORDER d BY shipment(d);
+//набор атрибутов шапки
+number 'Номер накладной' = DATA BPSTRING[10] (Shipment);
+date 'Дата накладной' = DATA DATE (Shipment);
+
+customer 'Покупатель' = DATA LegalEntity (Shipment);
+nameCustomer 'Наименование покупателя' (Shipment s) = name(customer(s));
+
+stock 'Склад' = DATA Stock(Shipment);
+nameStock 'Наименование склада' (Shipment s) = name(stock(s));        
+//атрибуты строки продажной накладной
+item 'Товар' = DATA Item (ShipmentDetail);
+nameItem 'Наименование товара' (ShipmentDetail d) = name(item(d));
+
+quantity 'Количество' = DATA NUMERIC[16,4](ShipmentDetail);
+price 'Цена продажи' = DATA NUMERIC[17,2](ShipmentDetail);
+sum 'Сумма продажи' (ShipmentDetail d) = quantity(d) * price(d);
+
+//автозаполнение цены продажи товара по расходной накладной значением оптовой цены, должно срабатывать в момент изменения товара для строки расходной накладной
+price(ShipmentDetail d) <- salePrice(item(d)) WHEN CHANGED(item(d));    
+
+//форма добавления и редактирования Расходной накладной. И указываем что будем использовать по умолчанию (Edit) 
+FORM shipment 'Расходная накладная'
+    OBJECTS s = Shipment PANEL
+    PROPERTIES(s) number, date, nameCustomer, nameStock
+
+    OBJECTS d = ShipmentDetail
+    PROPERTIES(d) nameItem, quantity, price, sum READONLY, NEW, DELETE GRID
+    FILTERS shipment(d) = s
+
+    EDIT Shipment OBJECT s
+;
+//Создаем форму Расходных накладных. На форму выведем все свойства, определенные выше для шапок документов и их строк.
+//Дополнительно выносим автоматически определенные кнопки добавления и редактирования Расходной накладной с помощью 
+//формы редактирования, созданной выше. Все свойства как шапки документов, так и их строк, кроме кнопок добавления и 
+//редактирования Расходной накладной, делаем недоступным для изменения непосредственно на форме (оператор READONLY).
+FORM shipments 'Расходные накладные'
+    OBJECTS s = Shipment
+    PROPERTIES(s) READONLY number, date, nameCustomer, nameStock
+    PROPERTIES(s) NEWSESSION NEW, EDIT, DELETE
+
+    OBJECTS d = ShipmentDetail
+    PROPERTIES(d) READONLY nameItem, quantity, price, sum
+    FILTERS shipment(d) = s
+;    

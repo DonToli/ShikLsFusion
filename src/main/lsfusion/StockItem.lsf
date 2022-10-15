@@ -1,0 +1,19 @@
+//разница между всеми приходами товара на склад и всеми его расходами со склада.
+MODULE StockItem;
+
+REQUIRE Shipment, Receipt;
+
+//расчетное свойство текущего остатка товара на складе в количественном исчислении.
+receivedQuantity 'Суммарный приход' = GROUP SUM quantity(ReceiptDetail d) BY item(d), stock(receipt(d));
+shippedQuantity 'Суммарный расход' = GROUP SUM quantity(ShipmentDetail d) BY item(d), stock(shipment(d));
+currentBalance 'Текущий остаток' (Item i, Stock s) = receivedQuantity (i, s) (-) shippedQuantity (i, s);
+
+//запрет на отрицательный остаток
+CONSTRAINT currentBalance(Item i, Stock s) < 0 MESSAGE 'Остаток по товару не может быть отрицательным';
+
+//форма отображения текущих остатков
+FORM currentBalanceItemStock 'Текущие остатки'
+    OBJECTS si = (s = Stock, i = Item)
+    PROPERTIES READONLY name(i), barcode(i), name(s), currentBalance(i, s)
+    FILTERS currentBalance(i, s)
+;
