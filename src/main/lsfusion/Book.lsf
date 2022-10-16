@@ -1,0 +1,74 @@
+MODULE Book;
+
+CLASS Category 'Категория';
+name 'Наименование' = DATA ISTRING[50] (Category);
+
+CLASS Book 'Книга';
+name 'Наименование' = DATA ISTRING[50] (Book);
+category 'Категория' = DATA Category (Book);
+FORM books 'Книги'
+    TREE cb c = Category, b = Book
+    PROPERTIES name(c), name(b)
+    FILTERS category(b) == c
+    
+    OBJECTS i = Book
+    PROPERTIES(i) name, category, NEW, DELETE
+;
+
+parent 'Родитель' = DATA Category (Category);
+FORM categories 'Категории'
+    TREE categories c = Category PARENT parent(c)
+    PROPERTIES(c) name
+    
+    OBJECTS i = Category
+    PROPERTIES(i) name,parent, NEW, DELETE
+;
+
+level 'Уровень' (Category child, Category parent) = RECURSION 1l IF child IS Category AND parent == child
+                                                                 STEP 2l IF parent == parent($parent) MATERIALIZED;
+
+FORM categoryBooks 'Книги по категориям'
+    TREE categories c = Category PARENT parent(c)
+    PROPERTIES(c) name
+
+    OBJECTS b = Book
+    PROPERTIES(b) name
+    FILTERS level(category(b), c)
+;
+
+CLASS Genre 'Жанр';
+name 'Наименование' = DATA ISTRING[100] (Genre);
+
+genre 'Жанр' = DATA Genre (Book);
+isForbidden 'Запрет' = DATA BOOLEAN (Book);
+
+CLASS Order 'Заказ';
+book 'Книга' = DATA Book (Order);
+nameBook 'Наименование книги' (Order o) = name(book(o));
+
+date 'Дата' = DATA DATE (Order);
+number 'Номер' = DATA STRING[100] (Order);
+
+CONSTRAINT isForbidden(book(Order o))
+    CHECKED BY book MESSAGE 'Запрещено выбирать эту книгу';
+
+FORM booksByGenre
+     OBJECTS g = Genre PANEL
+     PROPERTIES (g) name
+     OBJECTS c = Book
+     PROPERTIES (c) category
+;
+
+
+FORM orders 'Заказы'
+    OBJECTS g = Genre PANEL
+    PROPERTIES (g) name
+
+    OBJECTS o = Order
+    PROPERTIES(o) READONLY date, number
+    FILTERS g == genre(book(o))
+;
+
+NAVIGATOR {
+    NEW orders;
+}
