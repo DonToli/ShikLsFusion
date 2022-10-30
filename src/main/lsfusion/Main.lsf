@@ -1,6 +1,6 @@
 MODULE Main;
 
-REQUIRE Stock, Item, LegalEntity, Receipt, Shipment, StockItem, Book, AddDeleteOrder;
+REQUIRE Stock, Item, LegalEntity, Receipt, Shipment, StockItem, Book, AddDeleteOrder,Calc;
 
 //компонуем меню системы. Справочники в одну папку, документы в другую папку отображающуюся сразу после справочников
 NAVIGATOR {
@@ -13,7 +13,7 @@ NAVIGATOR {
     NEW FOLDER documents 'Документы' AFTER masterData WINDOW toolbar {
         NEW receipts;
         NEW shipments;
-       
+       NEW gcd;
     }
     NEW currentBalanceItemStock AFTER documents;
     NEW FOLDER categoryBooks 'Список жанров' AFTER currentBalanceItemStock WINDOW toolbar{
