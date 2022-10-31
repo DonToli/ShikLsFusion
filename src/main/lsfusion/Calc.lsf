@@ -1,6 +1,6 @@
 MODULE Calc;
 
-calculateGCD 'Рассчитать сумму' INTERNAL 'CalculateGCD' (INTEGER, INTEGER);
+calculateGCD 'Рассчитать сумму' INTERNAL 'Calculate' (INTEGER, INTEGER);
 // на форме
 FORM gcd 'Сумму'
     OBJECTS (a = INTEGER, b = INTEGER) PANEL

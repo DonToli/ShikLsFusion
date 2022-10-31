@@ -9,9 +9,9 @@ import lsfusion.server.physics.dev.integration.internal.to.InternalAction;
 import java.math.BigInteger;
 import java.sql.SQLException;
 
-public class CalculateGCD extends InternalAction {
+public class Calculate extends InternalAction {
 
-    public CalculateGCD(ScriptingLogicsModule LM, ValueClass... classes) {
+    public Calculate(ScriptingLogicsModule LM, ValueClass... classes) {
         super(LM, classes);
     }
 
